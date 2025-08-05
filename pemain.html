@@ -1,0 +1,75 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Bel Cerdas Cermat - Pemain</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { text-align: center; font-family: sans-serif; background: #f7f7f7; }
+    button {
+      margin-top: 30%;
+      padding: 30px;
+      font-size: 30px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 15px;
+    }
+    button:disabled {
+      background-color: gray;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Pilih Kelompok:</h2>
+  <select id="kelompok">
+    <option value="Kelompok 1">Kelompok 1</option>
+    <option value="Kelompok 2">Kelompok 2</option>
+    <option value="Kelompok 3">Kelompok 3</option>
+    <option value="Kelompok 4">Kelompok 4</option>
+  </select><br><br>
+
+  <button id="tombolBel">TEKAN BEL</button>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyA5wQhDAW8Gu34Wmj5s2Tq9j16Fnvc_ac",
+      authDomain: "bel-cerdas-cermat-edfc3.firebaseapp.com",
+      databaseURL: "https://bel-cerdas-cermat-edfc3-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "bel-cerdas-cermat-edfc3",
+      storageBucket: "bel-cerdas-cermat-edfc3.appspot.com",
+      messagingSenderId: "9557475736",
+      appId: "1:9557475736:web:0e0621e9cf65386b6642bed"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const tombol = document.getElementById('tombolBel');
+
+    tombol.onclick = () => {
+      const kelompok = document.getElementById('kelompok').value;
+      const waktu = Date.now();
+      db.ref('bel').once('value', snap => {
+        if (!snap.val() || snap.val().aktif === false) {
+          db.ref('bel').set({
+            kelompok: kelompok,
+            waktu: waktu,
+            aktif: true
+          });
+          tombol.disabled = true;
+        }
+      });
+    };
+
+    db.ref('bel').on('value', snap => {
+      if (!snap.val() || snap.val().aktif === false) {
+        tombol.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

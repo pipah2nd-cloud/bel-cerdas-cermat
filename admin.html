@@ -1,0 +1,104 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Bel Cerdas Cermat - Admin</title>
+  <style>
+    body { text-align: center; font-family: sans-serif; background: #f0f0f0; padding: 50px; }
+    #hasil {
+      font-size: 30px;
+      font-weight: bold;
+      color: #2c3e50;
+      margin-bottom: 20px;
+    }
+    #timer {
+      font-size: 24px;
+      color: #555;
+      margin-bottom: 20px;
+    }
+    button {
+      padding: 15px 30px;
+      font-size: 18px;
+      background-color: #e67e22;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      margin: 10px;
+    }
+    #enableSoundBtn {
+      background-color: #27ae60;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="hasil">Menunggu tombol ditekan...</div>
+  <div id="timer">Timer: 0</div>
+  <button onclick="mulaiTimer()">MULAI TIMER</button>
+  <button onclick="reset()">RESET BEL</button>
+  <button id="enableSoundBtn" onclick="enableSound()">AKTIFKAN SUARA</button>
+
+  <audio id="sound" src="bel.mp3" preload="auto"></audio>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyA5wQhDAW8Gu34Wmj5s2Tq9j16Fnvc_ac",
+      authDomain: "bel-cerdas-cermat-edfc3.firebaseapp.com",
+      databaseURL: "https://bel-cerdas-cermat-edfc3-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "bel-cerdas-cermat-edfc3",
+      storageBucket: "bel-cerdas-cermat-edfc3.appspot.com",
+      messagingSenderId: "9557475736",
+      appId: "1:9557475736:web:0e0621e9cf65386b6642bed"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const hasil = document.getElementById('hasil');
+    const sound = document.getElementById('sound');
+    const timerLabel = document.getElementById('timer');
+    let soundEnabled = false;
+
+    let countdown = 0;
+    let interval = null;
+
+    function enableSound() {
+      sound.play().then(() => {
+        soundEnabled = true;
+        document.getElementById('enableSoundBtn').style.display = 'none';
+      }).catch((e) => {
+        alert("Silakan izinkan suara di browser.");
+      });
+    }
+
+    function mulaiTimer() {
+      countdown = 10;
+      timerLabel.innerText = "Timer: " + countdown;
+      clearInterval(interval);
+      interval = setInterval(() => {
+        countdown--;
+        timerLabel.innerText = "Timer: " + countdown;
+        if (countdown <= 0) {
+          clearInterval(interval);
+        }
+      }, 1000);
+    }
+
+    db.ref('bel').on('value', snap => {
+      const data = snap.val();
+      if (data && data.aktif) {
+        hasil.innerText = data.kelompok + ' menekan bel!';
+        if (soundEnabled) sound.play();
+      } else {
+        hasil.innerText = 'Menunggu tombol ditekan...';
+      }
+    });
+
+    function reset() {
+      db.ref('bel').set({ aktif: false });
+      hasil.innerText = 'Menunggu tombol ditekan...';
+    }
+  </script>
+</body>
+</html>
